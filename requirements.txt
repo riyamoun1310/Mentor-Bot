@@ -1,0 +1,2 @@
+# For future: requirements.txt for Empathetic Code Reviewer
+# No external dependencies required for base version

@@ -1,0 +1,17 @@
+{
+  "code": "def add(a, b):\nreturn a+b\n",
+  "comments": [
+    {
+      "comment": "No space around operators.",
+      "severity": "minor"
+    },
+    {
+      "comment": "Function lacks a docstring.",
+      "severity": "major"
+    },
+    {
+      "comment": "No input validation for types.",
+      "severity": "critical"
+    }
+  ]
+}
