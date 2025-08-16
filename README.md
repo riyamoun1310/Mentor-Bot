@@ -32,92 +32,112 @@ This tool transforms code review comments into empathetic, constructive, and edu
 ```
 
 
-## Example Output
+
+# Empathetic Code Reviewer (Mentor-Bot)
+
+## 🚀 Overview
+Mentor-Bot is a hackathon-ready, AI-powered code reviewer that transforms code review comments into empathetic, constructive, and educational feedback. It uses Google Gemini LLM for natural, human-like suggestions and always produces a professional Markdown report—perfect for impressing judges and helping teams grow.
+
+## ✨ Features
+- **Empathetic, AI-generated rewrites** of review comments (Gemini LLM)
+- **Technical explanations** for every suggestion
+- **Before/After code improvements** (with type hints, docstrings, validation)
+- **Positive feedback** for good code practices
+- **Line referencing** for actionable feedback
+- **Automatic language detection** and style guide links
+- **Holistic summary and encouragement**
+- **Robust fallback** (never fails silently)
+
+## 🛠️ Setup
+1. **Clone the repo:**
+   ```
+   git clone https://github.com/riyamoun1310/Mentor-Bot.git
+   cd Mentor-Bot
+   ```
+2. **Install requirements:**
+   ```
+   pip install -r requirements.txt
+   ```
+3. **Set your Gemini API key:**
+   - Get a key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+   - Set it in your environment:
+     - Windows (PowerShell):
+       ```
+       $env:GEMINI_API_KEY="your-key-here"
+       ```
+     - Linux/macOS:
+       ```
+       export GEMINI_API_KEY="your-key-here"
+       ```
+
+## 🚦 Usage
+1. Prepare your code and comments in a JSON file (see `sample_input.json`).
+2. Run the reviewer:
+   ```
+   python main.py sample_input.json > report.md
+   ```
+3. Open `report.md` to view the Markdown report.
+
+## 📥 Example Input
+```json
+{
+  "code": "def add(a, b):\nreturn a+b\n",
+  "comments": [
+    { "comment": "No space around operators.", "severity": "minor" },
+    { "comment": "Function lacks a docstring.", "severity": "major" },
+    { "comment": "No input validation for types.", "severity": "critical" }
+  ]
+}
 ```
-# Empathetic Code Review
 
-## Code Snippet
+## 📤 Example Output
+See the generated `report.md` for a full, empathetic, and detailed review with:
+- Rewritten comments
+- Explanations
+- Before/After code blocks
+- Positive feedback
+- Summary and style guide links
 
-```python
-def add(a, b):
-return a+b
-```
-
-## Positive Feedback
-
-- Great use of function definitions to organize your code.
-- Good job using return statements to output results.
-
-## Review Comments
-
-### Comment 1
-
-**Original:** No space around operators. (See line 2: `return a+b`)
-
-**Empathetic Rewrite:** Nice job! Here's a minor improvement you could consider: No space around operators.
-
-**Why:** Following style guidelines for spacing around operators makes code more readable.
-
-**Suggested Improvement:** Add spaces around operators, e.g., change 'a+b' to 'a + b'.
-
-### Comment 2
-
-**Original:** Function lacks a docstring. (See line 1: `def add(a, b):`)
-
-**Empathetic Rewrite:** Great progress! Here's an important suggestion: Function lacks a docstring.
-
-**Why:** Adding a docstring improves code documentation and helps others understand the function's purpose.
-
-**Suggested Improvement:** Add a descriptive docstring at the beginning of your function.
-
-### Comment 3
-
-**Original:** No input validation for types.
-
-**Empathetic Rewrite:** Thank you for your effort! I noticed something that could significantly impact your code: No input validation for types.
-
-**Why:** Validating input types helps prevent runtime errors and makes your code more robust.
-
-**Suggested Improvement:** Add type checks or input validation to ensure correct usage.
-
----
-
-## Summary
-
-You addressed some critical issues—great learning opportunity! Keep up the effort and always review for robustness. Also, excellent work on the following: Great use of function definitions to organize your code., Good job using return statements to output results.
-Refer to the official style guide for more details: [PEP 8](https://peps.python.org/pep-0008/)
-
-Thank you for your hard work and dedication to improvement! 🚀
-
-## Project Structure
-
+## 🧩 Project Structure
 - `main.py` — Entry point, loads JSON and prints the Markdown report
-- `empathetic_reviewer.py` — Core logic for review, feedback, and suggestions
+- `empathetic_reviewer.py` — Gemini-powered review logic
 - `sample_input.json` — Example input file
-- `requirements.txt` — Python requirements (none needed for base version)
+- `requirements.txt` — Python requirements
 - `README.md` — Documentation and instructions
 
-## How it Works
-
+## 🧠 How It Works
 1. Reads a code snippet and review comments from a JSON file.
-2. Detects the programming language and links to the relevant style guide.
-3. Generates empathetic, educational, and actionable feedback for each comment.
-4. Highlights positive aspects of the code and references specific lines where possible.
-5. Outputs a professional Markdown report.
+2. Uses Gemini LLM to generate empathetic, educational, and actionable feedback for each comment.
+3. Highlights positive aspects of the code and references specific lines where possible.
+4. Outputs a professional Markdown report, ready for hackathon judging or team feedback.
 
-## Repository
+## 🏆 Why Use Mentor-Bot?
+- **Impress judges** with AI-powered, human-like reviews
+- **Always works** (robust fallback, never fails silently)
+- **Easy to extend** for new languages, rules, or LLMs
+- **Great for teams, students, and hackathons**
 
+## 🔧 Customization
+- Edit `empathetic_reviewer.py` to:
+  - Improve language detection
+  - Add new feedback rules
+  - Change the LLM prompt for different review styles
+
+## 📚 Requirements
+- Python 3.7+
+- `google-genai` (for Gemini LLM)
+
+## 🌐 Repository
 GitHub: https://github.com/riyamoun1310/Mentor-Bot
 
 ---
 
-## Stand-Out Features
-- Context-aware tone
+## 💡 Stand-Out Features
+- Context-aware, empathetic tone
 - Style guide links (e.g., PEP 8 for Python)
 - Holistic summary and encouragement
+- Markdown output for easy sharing
 
-## Requirements
-- Python 3.7+
+---
 
-## Customization
-You can extend `empathetic_reviewer.py` to improve language detection, explanations, or code suggestions.
+**Made for hackathons, teams, and anyone who wants code reviews that teach, not just critique!**

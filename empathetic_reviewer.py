@@ -1,8 +1,23 @@
-import re
-from typing import Dict, List
+from google import genai
+
+def call_gemini_review_api(code: str, comment: str, severity: str, language: str) -> str:
+    prompt = (
+        f"You are an expert, empathetic code reviewer. Given the following code and a review comment, do the following:\n"
+        "1. Rewrite the comment in a genuinely empathetic, constructive, and educational way, as if you are a human mentor.\n"
+        "2. Explain WHY this suggestion matters, mentioning readability, performance, or team impact as appropriate.\n"
+        "3. Suggest a significant code improvement, showing a before/after code block if possible.\n"
+        "4. Use Markdown formatting for all output.\n\n"
+        f"Code (language: {language}):\n{code}\n\n"
+        f"Review comment (severity: {severity}):\n{comment}\n"
+    )
+    client = genai.Client()
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+    return response.text
 
 def extract_positive_feedback(code: str) -> list:
-    """Simple positive feedback based on code features."""
     feedback = []
     if 'def ' in code:
         feedback.append("Great use of function definitions to organize your code.")
@@ -10,137 +25,43 @@ def extract_positive_feedback(code: str) -> list:
         feedback.append("Good job using return statements to output results.")
     if 'import ' in code:
         feedback.append("Nice use of imports to leverage existing libraries.")
-    # Add more as needed
     return feedback
 
 def find_line_for_comment(comment: str, code: str) -> str:
-    """Try to reference a line or fragment in the code related to the comment."""
     lines = code.split('\n')
     if 'docstring' in comment.lower():
         for i, line in enumerate(lines):
             if 'def ' in line:
                 return f"(See line {i+1}: `{line.strip()}`)"
-    if 'operator' in comment.lower():
-        for i, line in enumerate(lines):
-            if '+' in line or '-' in line or '*' in line or '/' in line:
-                return f"(See line {i+1}: `{line.strip()}`)"
+    for i, line in enumerate(lines):
+        if any(word in comment.lower() for word in line.lower().split()):
+            return f"(See line {i+1}: `{line.strip()}`)"
     return ""
 
-def detect_language(code: str) -> str:
-    """Detects the programming language from the code snippet."""
-    if 'def ' in code or 'import ' in code:
-        return 'python'
-    if 'function ' in code or 'console.log' in code:
-        return 'javascript'
-    if '#include' in code or 'int main' in code:
-        return 'c/c++'
-    return 'unknown'
-
-STYLE_GUIDES = {
-    'python': '[PEP 8](https://peps.python.org/pep-0008/)',
-    'javascript': '[JavaScript Style Guide](https://github.com/airbnb/javascript)',
-    'c/c++': '[C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)',
-}
-
-def empathetic_rewrite(comment: str, severity: str) -> str:
-    """Rewrite the comment to be empathetic and constructive, with flexible templates."""
-    templates = {
-        'critical': [
-            "Thank you for your effort! I noticed something that could significantly impact your code: {comment}",
-            "Let's address a critical issue: {comment}"
-        ],
-        'major': [
-            "Great progress! Here's an important suggestion: {comment}",
-            "Consider this key improvement: {comment}"
-        ],
-        'minor': [
-            "Nice job! Here's a minor improvement you could consider: {comment}",
-            "Just a small tip: {comment}"
-        ]
-    }
-    chosen = templates.get(severity, templates['minor'])
-    return chosen[0].format(comment=comment)
-
-def explain_why(comment: str) -> str:
-    """Expanded explanation for why the suggestion matters, mentioning readability, performance, and team impact."""
-    c = comment.lower()
-    if 'docstring' in c:
-        return ("Adding a docstring improves code documentation, helps your team understand the function's purpose, "
-                "and makes onboarding and maintenance easier for everyone.")
-    if 'space' in c and 'operator' in c:
-        return ("Following style guidelines for spacing around operators makes code more readable, reduces bugs, and "
-                "ensures consistency for anyone reading or maintaining the code.")
-    if 'validate' in c or 'input' in c:
-        return ("Validating input types helps prevent runtime errors, improves code robustness, and protects your team "
-                "from hard-to-find bugs in production.")
-    return ("This suggestion helps improve code quality, readability, and maintainability, making it easier for your team "
-            "to work together effectively.")
-
-def suggest_improvement(comment: str, code: str) -> str:
-    """Flexible suggestion for code improvement, with before/after code blocks."""
-    lines = code.split('\n')
-    # Docstring suggestion
-    if 'docstring' in comment.lower():
-        for i, line in enumerate(lines):
-            if 'def ' in line:
-                before = line
-                after = f'\"\"\"Describe what this function does.\"\"\"\n{line}'
-                return f"**Before:**\n```python\n{before}\n```\n**After:**\n```python\n{after}\n```\nAdd a descriptive docstring at the beginning of your function."
-    # Operator spacing suggestion
-    if 'space' in comment.lower() and 'operator' in comment.lower():
-        for i, line in enumerate(lines):
-            if '+' in line:
-                before = line
-                after = line.replace('+', ' + ')
-                return f"**Before:**\n```python\n{before}\n```\n**After:**\n```python\n{after}\n```\nAdd spaces around operators for better readability."
-    # Input validation suggestion
-    if 'validate' in comment.lower() or 'input' in comment.lower():
-        for i, line in enumerate(lines):
-            if 'def ' in line:
-                before = line
-                after = line + "\n    if not (isinstance(a, int) and isinstance(b, int)):\n        raise TypeError('Inputs must be integers')"
-                return f"**Before:**\n```python\n{before}\n```\n**After:**\n```python\n{after}\n```\nAdd type checks or input validation to ensure correct usage."
-    return "Consider revising the code as per the suggestion above."
-
-def generate_review_report(data: Dict) -> str:
+def generate_review_report(data: dict) -> str:
     code = data.get('code', '')
     comments = data.get('comments', [])
-    language = detect_language(code)
-    style_guide = STYLE_GUIDES.get(language, None)
+    language = data.get('language', 'python')
     report = ["# Empathetic Code Review\n"]
-    report.append("## Code Snippet\n")
-    report.append(f"```{language}\n{code}\n```")
-    # Positive feedback section
+    report.append(f"## Code Snippet\n\n```{language}\n{code.strip()}\n```\n")
     positives = extract_positive_feedback(code)
     if positives:
-        report.append("\n## Positive Feedback\n")
+        report.append("## Positive Feedback\n")
         for pos in positives:
             report.append(f"- {pos}")
-    report.append("\n## Review Comments\n")
+        report.append("")
+    report.append("## Review Comments\n")
     for idx, item in enumerate(comments, 1):
         comment = item.get('comment', '')
         severity = item.get('severity', 'minor')
         line_ref = find_line_for_comment(comment, code)
         report.append(f"### Comment {idx}\n")
         report.append(f"**Original:** {comment} {line_ref}\n")
-        report.append(f"**Empathetic Rewrite:** {empathetic_rewrite(comment, severity)}\n")
-        report.append(f"**Why:** {explain_why(comment)}\n")
-        report.append(f"**Suggested Improvement:**\n{suggest_improvement(comment, code)}\n")
+        try:
+            llm_output = call_gemini_review_api(code, comment, severity, language)
+            report.append(llm_output)
+        except Exception as e:
+            report.append(f"_LLM error: {e}_\n")
         report.append("")
     report.append("---\n")
-    report.append("## Summary\n")
-    # Dynamic summary based on severities
-    severities = [item.get('severity', 'minor') for item in comments]
-    if 'critical' in severities:
-        summary = "You addressed some critical issues—great learning opportunity! Keep up the effort and always review for robustness."
-    elif 'major' in severities:
-        summary = "You handled some important suggestions well. Keep refining your code for even better quality!"
-    else:
-        summary = "Your code is in great shape! Just a few minor improvements to consider."
-    if positives:
-        summary += " Also, excellent work on the following: " + ", ".join(positives)
-    report.append(summary + "\n")
-    if style_guide:
-        report.append(f"Refer to the official style guide for more details: {style_guide}\n")
-    report.append("Thank you for your hard work and dedication to improvement! 🚀\n")
     return '\n'.join(report)

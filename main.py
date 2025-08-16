@@ -14,6 +14,8 @@ def main():
     with open(input_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
     report = generate_review_report(data)
+    # Ensure UTF-8 output for Windows console redirection
+    sys.stdout.reconfigure(encoding='utf-8')
     print(report)
 
 if __name__ == "__main__":
