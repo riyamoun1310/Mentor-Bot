@@ -1,4 +1,6 @@
-# Helper functions for positive feedback and line referencing
+import re
+from typing import Dict, List
+
 def extract_positive_feedback(code: str) -> list:
     """Simple positive feedback based on code features."""
     feedback = []
@@ -23,10 +25,6 @@ def find_line_for_comment(comment: str, code: str) -> str:
             if '+' in line or '-' in line or '*' in line or '/' in line:
                 return f"(See line {i+1}: `{line.strip()}`)"
     return ""
-# Empathetic Code Reviewer Core Logic
-
-import re
-from typing import Dict, List
 
 def detect_language(code: str) -> str:
     """Detects the programming language from the code snippet."""
@@ -43,7 +41,6 @@ STYLE_GUIDES = {
     'javascript': '[JavaScript Style Guide](https://github.com/airbnb/javascript)',
     'c/c++': '[C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)',
 }
-
 
 def empathetic_rewrite(comment: str, severity: str) -> str:
     """Rewrite the comment to be empathetic and constructive, with flexible templates."""
@@ -62,31 +59,47 @@ def empathetic_rewrite(comment: str, severity: str) -> str:
         ]
     }
     chosen = templates.get(severity, templates['minor'])
-    # Pick the first template for now, can randomize or improve later
     return chosen[0].format(comment=comment)
 
-
 def explain_why(comment: str) -> str:
-    """Flexible explanation for why the suggestion matters."""
-    # Simple keyword-based logic for demo; can be extended
-    if 'docstring' in comment.lower():
-        return "Adding a docstring improves code documentation and helps others understand the function's purpose."
-    if 'space' in comment.lower() and 'operator' in comment.lower():
-        return "Following style guidelines for spacing around operators makes code more readable."
-    if 'validate' in comment.lower() or 'input' in comment.lower():
-        return "Validating input types helps prevent runtime errors and makes your code more robust."
-    return "This suggestion helps improve code quality, readability, or performance."
-
+    """Expanded explanation for why the suggestion matters, mentioning readability, performance, and team impact."""
+    c = comment.lower()
+    if 'docstring' in c:
+        return ("Adding a docstring improves code documentation, helps your team understand the function's purpose, "
+                "and makes onboarding and maintenance easier for everyone.")
+    if 'space' in c and 'operator' in c:
+        return ("Following style guidelines for spacing around operators makes code more readable, reduces bugs, and "
+                "ensures consistency for anyone reading or maintaining the code.")
+    if 'validate' in c or 'input' in c:
+        return ("Validating input types helps prevent runtime errors, improves code robustness, and protects your team "
+                "from hard-to-find bugs in production.")
+    return ("This suggestion helps improve code quality, readability, and maintainability, making it easier for your team "
+            "to work together effectively.")
 
 def suggest_improvement(comment: str, code: str) -> str:
-    """Flexible suggestion for code improvement."""
-    # Simple keyword-based logic for demo; can be extended
+    """Flexible suggestion for code improvement, with before/after code blocks."""
+    lines = code.split('\n')
+    # Docstring suggestion
     if 'docstring' in comment.lower():
-        return "Add a descriptive docstring at the beginning of your function."
+        for i, line in enumerate(lines):
+            if 'def ' in line:
+                before = line
+                after = f'\"\"\"Describe what this function does.\"\"\"\n{line}'
+                return f"**Before:**\n```python\n{before}\n```\n**After:**\n```python\n{after}\n```\nAdd a descriptive docstring at the beginning of your function."
+    # Operator spacing suggestion
     if 'space' in comment.lower() and 'operator' in comment.lower():
-        return "Add spaces around operators, e.g., change 'a+b' to 'a + b'."
+        for i, line in enumerate(lines):
+            if '+' in line:
+                before = line
+                after = line.replace('+', ' + ')
+                return f"**Before:**\n```python\n{before}\n```\n**After:**\n```python\n{after}\n```\nAdd spaces around operators for better readability."
+    # Input validation suggestion
     if 'validate' in comment.lower() or 'input' in comment.lower():
-        return "Add type checks or input validation to ensure correct usage."
+        for i, line in enumerate(lines):
+            if 'def ' in line:
+                before = line
+                after = line + "\n    if not (isinstance(a, int) and isinstance(b, int)):\n        raise TypeError('Inputs must be integers')"
+                return f"**Before:**\n```python\n{before}\n```\n**After:**\n```python\n{after}\n```\nAdd type checks or input validation to ensure correct usage."
     return "Consider revising the code as per the suggestion above."
 
 def generate_review_report(data: Dict) -> str:
@@ -112,7 +125,7 @@ def generate_review_report(data: Dict) -> str:
         report.append(f"**Original:** {comment} {line_ref}\n")
         report.append(f"**Empathetic Rewrite:** {empathetic_rewrite(comment, severity)}\n")
         report.append(f"**Why:** {explain_why(comment)}\n")
-        report.append(f"**Suggested Improvement:** {suggest_improvement(comment, code)}\n")
+        report.append(f"**Suggested Improvement:**\n{suggest_improvement(comment, code)}\n")
         report.append("")
     report.append("---\n")
     report.append("## Summary\n")
@@ -131,45 +144,3 @@ def generate_review_report(data: Dict) -> str:
         report.append(f"Refer to the official style guide for more details: {style_guide}\n")
     report.append("Thank you for your hard work and dedication to improvement! 🚀\n")
     return '\n'.join(report)
-    """Simple positive feedback based on code features."""
-    feedback = []
-    if 'def ' in code:
-        feedback.append("Great use of function definitions to organize your code.")
-    if 'return' in code:
-        feedback.append("Good job using return statements to output results.")
-    if 'import ' in code:
-        feedback.append("Nice use of imports to leverage existing libraries.")
-    # Add more as needed
-    return feedback
-    """Try to reference a line or fragment in the code related to the comment."""
-    lines = code.split('\n')
-    if 'docstring' in comment.lower():
-        for i, line in enumerate(lines):
-            if 'def ' in line:
-                return f"(See line {i+1}: `{line.strip()}`)"
-    if 'operator' in comment.lower():
-        for i, line in enumerate(lines):
-            if '+' in line or '-' in line or '*' in line or '/' in line:
-                return f"(See line {i+1}: `{line.strip()}`)"
-    return ""
-    """Simple positive feedback based on code features."""
-    feedback = []
-    if 'def ' in code:
-        feedback.append("Great use of function definitions to organize your code.")
-    if 'return' in code:
-        feedback.append("Good job using return statements to output results.")
-    if 'import ' in code:
-        feedback.append("Nice use of imports to leverage existing libraries.")
-    # Add more as needed
-    return feedback
-    """Try to reference a line or fragment in the code related to the comment."""
-    lines = code.split('\n')
-    if 'docstring' in comment.lower():
-        for i, line in enumerate(lines):
-            if 'def ' in line:
-                return f"(See line {i+1}: `{line.strip()}`)"
-    if 'operator' in comment.lower():
-        for i, line in enumerate(lines):
-            if '+' in line or '-' in line or '*' in line or '/' in line:
-                return f"(See line {i+1}: `{line.strip()}`)"
-    return ""
