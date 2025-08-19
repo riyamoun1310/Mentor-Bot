@@ -1,23 +1,42 @@
-# Empathetic Code Reviewer
 
-## Overview
-This tool transforms code review comments into empathetic, constructive, and educational feedback. It generates a Markdown report with rewrites, explanations, suggestions, and a summary, and links to relevant style guides based on the detected programming language.
+# Empathetic Code Reviewer (Mentor-Bot)
 
-## Features
-- Empathetic rewrites of review comments
-- Severity-based tone adjustment
-- Technical explanations for each suggestion
-- Suggested code improvements
-- Automatic language detection and style guide linking
-- Holistic summary and encouragement
+## 🚀 Overview
+Mentor-Bot is a hackathon-ready, AI-powered code reviewer that transforms code review comments into empathetic, constructive, and educational feedback. It uses Cohere LLM for natural, human-like suggestions and always produces a professional Markdown report—perfect for impressing judges and helping teams grow.
 
-## Usage
-1. Place your code and comments in a JSON file (see `sample_input.json`).
-2. Run the tool:
-   ```
-   python main.py sample_input.json
-   ```
-3. The Markdown report will be printed to the console.
+
+## ✨ Features
+- **Empathetic, AI-generated rewrites** of review comments (Cohere LLM)
+- **Technical explanations** for every suggestion
+- **Before/After code improvements** (with type hints, docstrings, validation)
+- **Positive feedback** for good code practices
+- **Line referencing** for actionable feedback
+- **Automatic language detection** and style guide links
+- **Holistic summary and encouragement**
+- **Robust fallback** (never fails silently)
+
+
+## 🛠️ Setup
+1. **Clone the repo:**
+  ```
+  git clone https://github.com/riyamoun1310/Mentor-Bot.git
+  cd Mentor-Bot
+  ```
+2. **Install requirements:**
+  ```
+  pip install -r requirements.txt
+  ```
+3. **Set your Cohere API key:**
+  - Get a key from [Cohere Dashboard](https://dashboard.cohere.com/api-keys)
+  - Set it in your environment:
+    - Windows (PowerShell):
+     ```
+     $env:COHERE_API_KEY="your-key-here"
+     ```
+    - Linux/macOS:
+     ```
+     export COHERE_API_KEY="your-key-here"
+     ```
 
 ## Example Input
 ```
@@ -100,14 +119,14 @@ See the generated `report.md` for a full, empathetic, and detailed review with:
 
 ## 🧩 Project Structure
 - `main.py` — Entry point, loads JSON and prints the Markdown report
-- `empathetic_reviewer.py` — Gemini-powered review logic
+- `empathetic_reviewer.py` — Cohere-powered review logic
 - `sample_input.json` — Example input file
 - `requirements.txt` — Python requirements
 - `README.md` — Documentation and instructions
 
 ## 🧠 How It Works
 1. Reads a code snippet and review comments from a JSON file.
-2. Uses Gemini LLM to generate empathetic, educational, and actionable feedback for each comment.
+2. Uses Cohere LLM to generate empathetic, educational, and actionable feedback for each comment.
 3. Highlights positive aspects of the code and references specific lines where possible.
 4. Outputs a professional Markdown report, ready for hackathon judging or team feedback.
 
@@ -125,7 +144,7 @@ See the generated `report.md` for a full, empathetic, and detailed review with:
 
 ## 📚 Requirements
 - Python 3.7+
-- `google-genai` (for Gemini LLM)
+- `cohere` (for Cohere LLM)
 
 ## 🌐 Repository
 GitHub: https://github.com/riyamoun1310/Mentor-Bot

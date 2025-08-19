@@ -1,6 +1,12 @@
-from google import genai
 
-def call_gemini_review_api(code: str, comment: str, severity: str, language: str) -> str:
+import os
+import cohere
+
+def call_cohere_review_api(code: str, comment: str, severity: str, language: str) -> str:
+    api_key = os.getenv("COHERE_API_KEY")
+    if not api_key:
+        return "_LLM error: Cohere API key not set. Set COHERE_API_KEY environment variable._"
+    co = cohere.Client(api_key)
     prompt = (
         f"You are an expert, empathetic code reviewer. Given the following code and a review comment, do the following:\n"
         "1. Rewrite the comment in a genuinely empathetic, constructive, and educational way, as if you are a human mentor.\n"
@@ -10,12 +16,14 @@ def call_gemini_review_api(code: str, comment: str, severity: str, language: str
         f"Code (language: {language}):\n{code}\n\n"
         f"Review comment (severity: {severity}):\n{comment}\n"
     )
-    client = genai.Client()
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
+    response = co.generate(
+        model="command-r-plus",
+        prompt=prompt,
+        max_tokens=600,
+        temperature=0.7
     )
-    return response.text
+    return response.generations[0].text.strip()
+
 
 def extract_positive_feedback(code: str) -> list:
     feedback = []
@@ -58,10 +66,10 @@ def generate_review_report(data: dict) -> str:
         report.append(f"### Comment {idx}\n")
         report.append(f"**Original:** {comment} {line_ref}\n")
         try:
-            llm_output = call_gemini_review_api(code, comment, severity, language)
+            llm_output = call_cohere_review_api(code, comment, severity, language)
             report.append(llm_output)
         except Exception as e:
-            report.append(f"_LLM error: {e}_\n")
+            report.append(f"_LLM error: {e}_.\n")
         report.append("")
     report.append("---\n")
     return '\n'.join(report)
